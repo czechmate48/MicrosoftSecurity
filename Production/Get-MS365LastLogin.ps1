@@ -8,10 +8,6 @@ Function Get-MS365LastLogin {
     tenant. If more users are needed, they can be passed in or the code must be manually modified
     .PARAMETER $UserPrincipalName
     The upn of the users login reports to obtain
-    .PARAMETER $TenantId
-    The ID number for the tenant to access the graph
-    .PARAMETER $AppClientId
-    The ID number for the app to access the graph
     .PARAMETER $Member
     Tells the cmdlet to only obtain information on members
     .PARAMETER $Guest
@@ -22,30 +18,20 @@ Function Get-MS365LastLogin {
     Get-MS365LastLogin -TenandID xxxx -AppClientId xxxx -userprincipalname john.doe@contoso.net,jane.doe@contoso.net
     #>
 
+    [CmdletBinding()]
     param (
         [System.Object[]] $UserPrincipalName,
-        [Parameter(Mandatory)]
-        [System.String] $TenantId,
-        [Parameter(Mandatory)]
-        [System.String] $AppClientId,
         [Switch] $member,
         [Switch] $guest
     )
 
     BEGIN{
 
-        $MsalParams = @{
-            ClientId = $AppClientId
-            TenantId = $TenantId
-            Scopes   = "https://graph.microsoft.com/User.Read.All","https://graph.microsoft.com/AuditLog.Read.All"
-        }
-        
-        $MsalResponse = Get-MsalToken @MsalParams
-        $AccessToken  = $MsalResponse.AccessToken
-        $headers = @{'Content-Type'="application\json";'Authorization'="Bearer $AccessToken"}
+        # Query graph API for first 999 users
         $ApiUrl = "https://graph.microsoft.com/beta/users?`$select=accountEnabled,displayName,userPrincipalName,signInActivity,userType,createdDateTime,ExternalUserState&`$top=999"
         $Response = Invoke-RestMethod -Method Get -Uri $apiurl -headers $headers
         
+        # Select specific users if specified by the end user
         if ($UserPrincipalName.count -ne 0){
             $Users = @()
             foreach ($user in $Response.Value){
@@ -132,4 +118,6 @@ Function Get-MS365LastLogin {
             }
         }
     }
+
+    END {}
 }
