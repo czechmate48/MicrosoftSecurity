@@ -1,0 +1,44 @@
+Function Get-MS365IdentityCompliance {
+
+    <#
+    .SYNOPSIS
+    .DESCRIPTION
+    .PARAMETER $UserPrincipalName
+    .PARAMETER $Member
+    .PARAMETER $Guest
+    .EXAMPLE
+    .EXAMPLE
+    #>
+
+    [CmdletBinding()]
+    param (
+        [System.Object[]] $UserPrincipalName = @(),
+        [Switch] $member,
+        [Switch] $guest
+    )
+
+    BEGIN{
+
+        if ($UserPrincipalName.Count -eq 0){
+            $ApiUrl = "https://graph.microsoft.com/v1.0/users?`$top=999"
+            $Response = Invoke-RestMethod -Method Get -Uri $apiurl -headers $headers
+
+            foreach ($resp in $response.value){
+                $UserPrincipalName += $resp.userprincipalname
+            }
+        }
+
+    }
+
+    PROCESS {
+
+        foreach ($user in $UserPrincipalName){
+            Invoke-RestMethod -Method Get -uri "https://graph.microsoft.com/v1.0/users/$user/authentication/methods" -headers $headers
+        }
+
+        GET /users/{id | userPrincipalName}/authentication/methods
+  
+    }
+
+    END {}
+}
