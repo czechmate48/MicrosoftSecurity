@@ -17,9 +17,7 @@ Function Get-MS365ActiveAuthenticationMethod {
 
     [CmdletBinding()]
     param (
-        [System.Object[]] $UserPrincipalName = @(), # Declare array as empty or values will be added one letter at a time instead of one UPN at a time
-        [Switch] $member,
-        [Switch] $guest
+        [System.Object[]] $UserPrincipalName = @() # Declare array as empty or values will be added one letter at a time instead of one UPN at a time
     )
 
     BEGIN{
