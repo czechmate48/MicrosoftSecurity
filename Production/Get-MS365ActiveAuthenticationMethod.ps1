@@ -38,48 +38,54 @@ Function Get-MS365ActiveAuthenticationMethod {
     PROCESS {
 
         foreach ($user in $UserPrincipalName){
-            $response = Invoke-RestMethod -Method Get -uri "https://graph.microsoft.com/v1.0/users/$user/authentication/methods" -headers $headers
 
-            $Email,$Fido,$Authenticator,$Password,$Phone,$SoftwareOath,$TemporaryAccessPass,$WindowsHello = ''
+            Try {
+                $response = Invoke-RestMethod -Method Get -uri "https://graph.microsoft.com/v1.0/users/$user/authentication/methods" -headers $headers -ErrorAction Stop
 
-            foreach ($value in $response.value){
-                if ($value.'@odata.type' -like "*emailAuthenticationMethod*"){
-                    $Email = "Active"
+                $Email,$Fido,$Authenticator,$Password,$Phone,$SoftwareOath,$TemporaryAccessPass,$WindowsHello = ''
+
+                foreach ($value in $response.value){
+                    if ($value.'@odata.type' -like "*emailAuthenticationMethod*"){
+                        $Email = "Active"
+                    }
+                    if ($value.'@odata.type' -like "*fido2AuthenticationMethod*"){
+                        $Fido = "Active"
+                    }
+                    if ($value.'@odata.type' -like "*microsoftAuthentcatorAuthenticationMethod*"){
+                        $Authenticator = "Active"
+                    }
+                    if ($value.'@odata.type' -like  "*passwordAuthenticationMethod*"){
+                        $Password = "Active"
+                    }
+                    if ($value.'@odata.type' -like  "*PhoneAuthenticationMethod*"){
+                        $Phone = "Active"
+                    }
+                    if ($value.'@odata.type' -like  "*softwareOathAuthenticationMethod*"){
+                        $SoftwareOath = "Active"
+                    }
+                    if ($value.'@odata.type' -like  "*temporaryAccessPassAuthenticationMethod*"){
+                        $TemporaryAccessPass = "Active"
+                    }
+                    if ($value.'@odata.type' -like  "*windowsHelloForBusinessAuthenticationMethod*"){
+                        $WindowsHello = "Active"
+                    }
                 }
-                if ($value.'@odata.type' -like "*fido2AuthenticationMethod*"){
-                    $Fido = "Active"
+
+                [PSCustomObject]@{
+                    UserPrincipalName = $user
+                    Email = $Email
+                    Fido = $Fido
+                    Authenticator = $Authenticator
+                    Password = $Password
+                    Phone = $Phone
+                    SoftwareOath = $SoftwareOath
+                    TemporaryAccessPass = $TemporaryAccessPass
+                    WindowsHello = $WindowsHello
                 }
-                if ($value.'@odata.type' -like "*microsoftAuthentcatorAuthenticationMethod*"){
-                    $Authenticator = "Active"
-                }
-                if ($value.'@odata.type' -like  "*passwordAuthenticationMethod*"){
-                    $Password = "Active"
-                }
-                if ($value.'@odata.type' -like  "*PhoneAuthenticationMethod*"){
-                    $Phone = "Active"
-                }
-                if ($value.'@odata.type' -like  "*softwareOathAuthenticationMethod*"){
-                    $SoftwareOath = "Active"
-                }
-                if ($value.'@odata.type' -like  "*temporaryAccessPassAuthenticationMethod*"){
-                    $TemporaryAccessPass = "Active"
-                }
-                if ($value.'@odata.type' -like  "*windowsHelloForBusinessAuthenticationMethod*"){
-                    $WindowsHello = "Active"
-                }
+            } Catch {
+                # Do Nothing
             }
-
-            [PSCustomObject]@{
-                UserPrincipalName = $user
-                Email = $Email
-                Fido = $Fido
-                Authenticator = $Authenticator
-                Password = $Password
-                Phone = $Phone
-                SoftwareOath = $SoftwareOath
-                TemporaryAccessPass = $TemporaryAccessPass
-                WindowsHello = $WindowsHello
-            }
+            
         }
     
     }
